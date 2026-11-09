@@ -1,0 +1,3 @@
+51369fe1ce208371d9a0cbca673372bcea1a8a849de73fe89de4d47115350704 *dist/SceneMate-p0-1.0.0-arm64-v8a.apk
+2aa0572a1df95594f70fdcdc8da1c21202e1565f091b75ef58a31b320bb87c3b *dist/SceneMate-p0-1.0.0-armeabi-v7a.apk
+c04b4e1c8a6ca2e4de976ac3244104945e41f8132c1bb1d4dbcf29f14ed9738f *dist/SceneMate-p0-1.0.0-universal.apk

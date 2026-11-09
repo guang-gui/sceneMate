@@ -1,0 +1,143 @@
+[
+  {
+    "latency_ms": 2213,
+    "input_tokens": 934,
+    "output_tokens": 285,
+    "cost_cny": 0.00415,
+    "issues": [],
+    "output": {
+      "scene": {
+        "label": "beach_sunset",
+        "confidence": 0.92
+      },
+      "lighting": {
+        "label": "backlit",
+        "confidence": 0.9,
+        "lux_estimate": 320
+      },
+      "subject": {
+        "label": "person",
+        "count": 1,
+        "confidence": 0.95
+      },
+      "tier": "weak",
+      "instruction": {
+        "actor": "subject",
+        "direction": "right",
+        "magnitude": "0.6m",
+        "text": "让她向右 0.6m"
+      },
+      "params": {
+        "iso": 400,
+        "shutter": "1/160",
+        "ev": 0.7,
+        "wb_k": 5200,
+        "reason": "逆光下主体欠曝，降低 ISO 减少噪点并提升快门，加 EV 补偿面部亮度"
+      },
+      "explain": {
+        "before": "人物与太阳重叠，面部几乎全黑",
+        "after": "人物侧移离开太阳，面部轮廓与肤色可见",
+        "mechanism": "主体移出逆光核心后受光面增大，相机测光对脸部权重提升",
+        "benefit": "保留日落色彩同时让人物曝光正常"
+      },
+      "risk": {
+        "low_light": false,
+        "advice": "逆光下动态范围有限，若面部仍偏暗建议改用原生相机夜景模式"
+      }
+    }
+  },
+  {
+    "latency_ms": 2853,
+    "input_tokens": 934,
+    "output_tokens": 301,
+    "cost_cny": 0.00428,
+    "issues": [],
+    "output": {
+      "scene": {
+        "label": "beach_sunset_portrait",
+        "confidence": 0.86
+      },
+      "lighting": {
+        "label": "backlit",
+        "confidence": 0.9,
+        "lux_estimate": 320
+      },
+      "subject": {
+        "label": "person",
+        "count": 1,
+        "confidence": 0.92
+      },
+      "tier": "strong",
+      "instruction": {
+        "actor": "subject",
+        "direction": "left",
+        "magnitude": "half_step",
+        "text": "让她向左半步"
+      },
+      "params": {
+        "iso": 400,
+        "shutter": "1/125",
+        "ev": 0.7,
+        "wb_k": 5600,
+        "reason": "逆光下降低 ISO 以减少噪点，加 EV 让主体面部由欠曝恢复，快门仍在安全范围内"
+      },
+      "explain": {
+        "before": "太阳在人物正后方，面部与衣服处于剪影状，细节丢失",
+        "after": "人物与太阳错开，面部受侧面反射光，曝光更均衡",
+        "mechanism": "侧移避开直射逆光，同时降低 ISO 与提高 EV 补偿主体亮度",
+        "benefit": "保留日落暖色背景的同时让主体面部可辨"
+      },
+      "risk": {
+        "low_light": true,
+        "advice": "逆光主体明显欠曝，建议改用原生相机夜景模式，画面亮度与细节不做画质保证"
+      }
+    }
+  },
+  {
+    "latency_ms": 1939,
+    "input_tokens": 934,
+    "output_tokens": 275,
+    "cost_cny": 0.00407,
+    "issues": [],
+    "output": {
+      "scene": {
+        "label": "beach_sunset",
+        "confidence": 0.88
+      },
+      "lighting": {
+        "label": "backlit",
+        "confidence": 0.9,
+        "lux_estimate": 320
+      },
+      "subject": {
+        "label": "person",
+        "count": 1,
+        "confidence": 0.95
+      },
+      "tier": "strong",
+      "instruction": {
+        "actor": "subject",
+        "direction": "left",
+        "magnitude": "half_step",
+        "text": "让她向左半步"
+      },
+      "params": {
+        "iso": 400,
+        "shutter": "1/60",
+        "ev": 1.0,
+        "wb_k": 5600,
+        "reason": "逆光人脸欠曝，提 EV 补光并降低 ISO 控制噪点"
+      },
+      "explain": {
+        "before": "逆光下人脸全黑，与天空反差过大",
+        "after": "主体左移半步脱离正对太阳的轮廓位，面部开始有环境光",
+        "mechanism": "改变主体与逆光源的相对角度，减少轮廓强反差",
+        "benefit": "人脸可辨识，保留夕阳氛围"
+      },
+      "risk": {
+        "low_light": true,
+        "advice": "逆光下暗部噪点明显，建议改用原生相机夜景，不承诺画质"
+      }
+    }
+  }
+]

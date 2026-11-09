@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SceneMate 取景助手 · UI 概念稿</title>
+<style>
+  :root{
+    --acc:#4FE3C1;
+    --acc-dim:rgba(79,227,193,.16);
+    --warn:#FFC46B;
+    --ink:#0A0B0F;
+    --ink-2:#12141A;
+    --txt:#F4F6F8;
+    --dim:rgba(244,246,248,.56);
+    --dim-2:rgba(244,246,248,.34);
+    --line:rgba(255,255,255,.12);
+    --glass:rgba(255,255,255,.075);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  body{
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #ffffff 0%, transparent 55%),
+      radial-gradient(900px 500px at 95% 0%, #eef2f7 0%, transparent 50%),
+      #F4F5F7;
+    color:#15171C;
+    font-family:"PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    padding:56px 40px 90px;
+    min-height:100vh;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;
+    background-image:linear-gradient(rgba(20,24,32,.032) 1px,transparent 1px),linear-gradient(90deg,rgba(20,24,32,.032) 1px,transparent 1px);
+    background-size:32px 32px;
+    mask-image:radial-gradient(1200px 700px at 50% 0%,#000 30%,transparent 85%);
+  }
+
+  /* ---------- page header ---------- */
+  .head{max-width:1560px;margin:0 auto 54px;display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;position:relative}
+  .brand{display:flex;align-items:center;gap:14px}
+  .mark{
+    width:44px;height:44px;border-radius:13px;flex:none;
+    background:linear-gradient(150deg,#1B1E26,#0A0B0F);
+    display:grid;place-items:center;box-shadow:0 8px 24px rgba(10,11,15,.28),inset 0 0 0 1px rgba(255,255,255,.09);
+  }
+  .mark svg{width:22px;height:22px}
+  h1{font-size:23px;font-weight:650;letter-spacing:-.3px;line-height:1.2}
+  .sub{font-size:13px;color:#6B7280;margin-top:5px;letter-spacing:.1px}
+  .head-tags{display:flex;gap:8px;flex-wrap:wrap}
+  .tag{
+    font-size:11.5px;padding:7px 12px;border-radius:999px;color:#3D4350;
+    background:rgba(255,255,255,.78);border:1px solid rgba(20,24,32,.09);
+    box-shadow:0 1px 2px rgba(16,24,40,.04);letter-spacing:.2px;
+  }
+  .tag.on{background:#12141A;color:#EAF7F3;border-color:#12141A}
+  .tag.on i{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--acc);margin-right:6px;vertical-align:1px}
+
+  /* ---------- stage ---------- */
+  .stage{max-width:1560px;margin:0 auto;display:flex;flex-wrap:wrap;gap:52px 44px;justify-content:center}
+  .device{width:360px;flex:none;display:flex;flex-direction:column;gap:20px}
+  .frame{
+    position:relative;width:360px;height:780px;border-radius:46px;
+    background:linear-gradient(160deg,#2A2D35,#0B0C10 40%,#05060A);
+    padding:9px;
+    box-shadow:
+      0 40px 70px -22px rgba(12,16,24,.42),
+      0 12px 26px -12px rgba(12,16,24,.3),
+      inset 0 0 0 1px rgba(255,255,255,.1);
+    transition:transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .45s;
+  }
+  .device:hover .frame{transform:translateY(-8px);box-shadow:0 54px 90px -24px rgba(12,16,24,.5),0 14px 30px -12px rgba(12,16,24,.34),inset 0 0 0 1px rgba(255,255,255,.14)}
+  .screen{
+    position:relative;width:100%;height:100%;border-radius:38px;overflow:hidden;
+    background:#08090D;color:var(--txt);
+    isolation:isolate;
+  }
+  .notch{
+    position:absolute;top:9px;left:50%;transform:translateX(-50%);
+    width:106px;height:26px;border-radius:16px;background:#000;z-index:60;
+  }
+  .notch::after{content:"";position:absolute;right:14px;top:8px;width:9px;height:9px;border-radius:50%;background:#141821;box-shadow:inset 0 0 0 1px rgba(120,180,255,.22)}
+  .home-bar{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:126px;height:4.5px;border-radius:99px;background:rgba(255,255,255,.62);z-index:60}
+
+  figcaption{display:flex;flex-direction:column;gap:6px;padding:0 6px}
+  .cap-top{display:flex;align-items:baseline;gap:9px}
+  .cap-num{
+    font-size:11px;font-weight:600;letter-spacing:.4px;color:#12141A;
+    background:var(--acc);border-radius:5px;padding:2px 6px;
+  }
+  .cap-title{font-size:14.5px;font-weight:640;color:#15171C;letter-spacing:-.1px}
+  .cap-desc{font-size:12px;line-height:1.6;color:#77808F;max-width:330px}
+
+  /* ---------- shared screen UI ---------- */
+  .statusbar{
+    position:absolute;top:0;left:0;right:0;height:52px;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 26px 0;font-size:12.5px;font-weight:600;letter-spacing:.2px;
+    color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.35);
+  }
+  .sb-right{display:flex;align-items:center;gap:5px}
+  .bars{display:flex;align-items:flex-end;gap:2px;height:10px}
+  .bars i{width:3px;border-radius:1px;background:currentColor;display:block}
+  .bars i:nth-child(1){height:4px}.bars i:nth-child(2){height:6px}
+  .bars i:nth-child(3){height:8px}.bars i:nth-child(4){height:10px}
+  .batt{width:20px;height:10px;border-radius:3px;border:1.2px solid currentColor;position:relative;opacity:.95}
+  .batt::before{content:"";position:absolute;inset:1.6px;width:11px;border-radius:1.5px;background:currentColor}
+  .batt::after{content:"";position:absolute;right:-3.2px;top:3px;width:2px;height:4px;border-radius:0 2px 2px 0;background:currentColor}
+
+  /* scene backgrounds */
+  .scene{position:absolute;inset:0;z-index:0;overflow:hidden}
+  .scene-sunset{
+    background:
+      radial-gradient(42% 26% at 63% 55%, rgba(255,220,158,.92) 0%, rgba(255,168,96,.42) 38%, rgba(255,140,80,0) 72%),
+      linear-gradient(180deg,#080E24 0%,#131A3C 14%,#2C2C58 27%,#5C3E63 38%,#94566A 46%,#CB6E5C 52%,#F0A46B 56%,#8E6A63 58.5%,#3B3040 66%,#1C1726 80%,#0A0910 100%);
+  }
+  .scene-sunset::after{
+    content:"";position:absolute;left:0;right:0;top:58%;bottom:0;
+    background:
+      linear-gradient(180deg,rgba(255,196,140,.24) 0%,rgba(255,150,110,.06) 12%,transparent 34%),
+      repeating-linear-gradient(180deg,rgba(255,190,150,.09) 0 1px,transparent 1px 9px);
+    mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.5) 45%,transparent 88%);
+  }
+  .scene-dusk{
+    background:
+      radial-gradient(50% 30% at 30% 48%, rgba(120,200,255,.30) 0%, transparent 70%),
+      linear-gradient(180deg,#05070F 0%,#0B1226 22%,#152036 45%,#20304A 58%,#101828 74%,#05070C 100%);
+  }
+  .vignette{position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(120% 80% at 50% 45%,transparent 42%,rgba(0,0,0,.42) 100%),
+               linear-gradient(180deg,rgba(0,0,0,.42) 0%,transparent 22%,transparent 62%,rgba(0,0,0,.68) 100%);}
+
+  /* ---------- screen 1 ---------- */
+  .ai-pill{
+    position:absolute;top:60px;left:50%;transform:translateX(-50%);z-index:30;
+    display:flex;align-items:center;gap:8px;white-space:nowrap;
+    padding:8px 13px 8px 11px;border-radius:999px;
+    background:rgba(10,12,18,.46);border:1px solid rgba(255,255,255,.16);
+    backdrop-filter:blur(18px) saturate(140%);
+    font-size:12px;letter-spacing:.1px;
+    box-shadow:0 8px 22px -10px rgba(0,0,0,.6);
+  }
+  .ai-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 0 rgba(79,227,193,.6);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(79,227,193,.55)}70%{box-shadow:0 0 0 8px rgba(79,227,193,0)}100%{box-shadow:0 0 0 0 rgba(79,227,193,0)}}
+  .ai-pill span{color:rgba(255,255,255,.6);font-size:11.5px}
+  .ai-pill b{font-weight:600;color:#fff}
+  .ai-pill em{font-style:normal;font-size:10.5px;color:var(--acc);background:rgba(79,227,193,.14);padding:2px 6px;border-radius:5px;letter-spacing:.2px}
+
+  .toolbar{position:absolute;right:14px;top:118px;z-index:30;display:flex;flex-direction:column;gap:10px}
+  .tbtn{
+    width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+    background:rgba(10,12,18,.4);border:1px solid rgba(255,255,255,.14);
+    backdrop-filter:blur(14px);color:rgba(255,255,255,.86);
+  }
+  .tbtn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .tbtn.act{background:rgba(79,227,193,.16);border-color:rgba(79,227,193,.45);color:var(--acc)}
+
+  /* placement guide */
+  .guide{
+    position:absolute;left:50%;top:184px;transform:translateX(-50%);
+    width:196px;height:322px;z-index:20;
+  }
+  .corner{position:absolute;width:26px;height:26px;border:2px solid var(--acc);opacity:.95;
+    filter:drop-shadow(0 0 8px rgba(79,227,193,.55))}
+  .corner.tl{top:0;left:0;border-right:0;border-bottom:0;border-radius:4px 0 0 0}
+  .corner.tr{top:0;right:0;border-left:0;border-bottom:0;border-radius:0 4px 0 0}
+  .corner.bl{bottom:0;left:0;border-right:0;border-top:0;border-radius:0 0 0 4px}
+  .corner.br{bottom:0;right:0;border-left:0;border-top:0;border-radius:0 0 4px 0}
+  .guide-bg{
+    position:absolute;inset:0;border-radius:8px;
+    background:linear-gradient(180deg,rgba(79,227,193,.05),rgba(79,227,193,.11) 78%,rgba(79,227,193,.2));
+    border:1px dashed rgba(79,227,193,.34);
+    animation:breathe 3.4s ease-in-out infinite;
+  }
+  @keyframes breathe{0%,100%{opacity:.72}50%{opacity:1}}
+  .figure-ghost{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);width:78px;height:182px;
+    fill:rgba(255,255,255,.13);stroke:rgba(255,255,255,.5);stroke-width:1.4;stroke-dasharray:5 4}
+  .feet{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);display:flex;gap:14px}
+  .feet i{width:19px;height:8px;border-radius:50%;border:1.6px solid var(--acc);background:rgba(79,227,193,.18);display:block}
+  .guide-tag{
+    position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+    background:var(--acc);color:#04241E;font-size:11px;font-weight:700;letter-spacing:.3px;
+    padding:4px 10px;border-radius:6px;white-space:nowrap;
+    box-shadow:0 4px 14px rgba(79,227,193,.35);
+  }
+  .dist{
+    position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);
+    font-size:11px;color:rgba(255,255,255,.72);letter-spacing:.2px;white-space:nowrap;
+    display:flex;align-items:center;gap:5px;
+  }
+  .dist::before,.dist::after{content:"";width:16px;height:1px;background:rgba(255,255,255,.3)}
+  .hint-chip{
+    position:absolute;left:50%;transform:translateX(-50%);bottom:188px;
+    font-size:10.5px;color:rgba(255,255,255,.9);background:rgba(10,12,18,.5);
+    border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(12px);
+    padding:5px 10px;border-radius:999px;white-space:nowrap;z-index:25;
+  }
+  .hint-chip b{color:var(--acc);font-weight:600}
+
+  .scan{
+    position:absolute;left:0;right:0;height:88px;z-index:15;pointer-events:none;
+    background:linear-gradient(180deg,transparent,rgba(79,227,193,.14) 62%,rgba(79,227,193,.5) 98%,transparent);
+    animation:scan 5.5s linear infinite;opacity:.55;
+  }
+  @keyframes scan{0%{top:-90px}100%{top:780px}}
+
+  .exif{
+    position:absolute;left:16px;bottom:132px;z-index:30;
+    display:flex;align-items:center;gap:8px;font-size:10.5px;letter-spacing:.2px;
+    color:rgba(255,255,255,.82);
+    background:rgba(10,12,18,.44);border:1px solid rgba(255,255,255,.13);
+    backdrop-filter:blur(14px);padding:6px 10px;border-radius:8px;
+  }
+  .exif b{color:var(--acc);font-weight:600}
+  .exif .sep{width:1px;height:9px;background:rgba(255,255,255,.2)}
+
+  .modes{position:absolute;left:0;right:0;bottom:96px;z-index:30;display:flex;justify-content:center;gap:26px;font-size:11.5px;letter-spacing:.4px;color:rgba(255,255,255,.5)}
+  .modes span{position:relative;padding-bottom:7px}
+  .modes span.on{color:var(--acc);font-weight:600}
+  .modes span.on::after{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--acc)}
+
+  .controls{position:absolute;left:0;right:0;bottom:26px;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 30px}
+  .thumb{width:44px;height:44px;border-radius:12px;border:1.5px solid rgba(255,255,255,.4);overflow:hidden;
+    background:linear-gradient(150deg,#F0A46B,#8E5E6E 45%,#241F33);position:relative}
+  .thumb::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 50% at 40% 30%,rgba(255,225,180,.6),transparent 70%)}
+  .shutter{
+    width:72px;height:72px;border-radius:50%;border:2.5px solid rgba(255,255,255,.9);
+    display:grid;place-items:center;position:relative;
+    box-shadow:0 0 0 1px rgba(0,0,0,.3);
+  }
+  .shutter i{width:58px;height:58px;border-radius:50%;background:#fff;display:block;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+  .flip{width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.08)}
+  .flip svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+  /* ---------- screen 2 : analysis sheet ---------- */
+  .s2-top{position:absolute;top:62px;left:18px;right:18px;z-index:45;display:flex;align-items:center;justify-content:space-between}
+  .s2-back{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(14px);display:grid;place-items:center;color:#fff}
+  .s2-back svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .s2-frames{font-size:10.5px;color:rgba(255,255,255,.55);background:rgba(10,12,18,.42);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(14px);padding:6px 10px;border-radius:999px;letter-spacing:.2px}
+  .s2-scene{filter:blur(1.5px) brightness(.62) saturate(1.05);transform:scale(1.04)}
+  .sheet{
+    position:absolute;left:0;right:0;bottom:0;z-index:40;
+    background:linear-gradient(180deg,rgba(20,22,30,.94),rgba(9,10,15,.985));
+    border-top:1px solid rgba(255,255,255,.12);
+    border-radius:26px 26px 0 0;
+    padding:12px 20px 30px;
+    box-shadow:0 -20px 50px -12px rgba(0,0,0,.7);
+    backdrop-filter:blur(24px);
+  }
+  .handle{width:38px;height:4px;border-radius:99px;background:rgba(255,255,255,.24);margin:0 auto 16px}
+  .sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .sheet-head h3{font-size:15.5px;font-weight:640;letter-spacing:-.2px}
+  .sheet-head .live{font-size:10.5px;color:var(--acc);display:flex;align-items:center;gap:5px;letter-spacing:.2px}
+  .sheet-head .live i{width:5px;height:5px;border-radius:50%;background:var(--acc);animation:pulse 2s infinite}
+  .kv{display:flex;gap:9px;margin-bottom:18px}
+  .kv-item{flex:1;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:9px 9px}
+  .kv-item span{display:block;font-size:10px;color:rgba(255,255,255,.42);letter-spacing:.3px;margin-bottom:5px;white-space:nowrap}
+  .kv-item span em{font-style:normal;color:var(--acc);font-weight:600;margin-left:2px}
+  .kv-item b{font-size:12px;font-weight:600;letter-spacing:-.1px;white-space:nowrap}
+
+  .mapwrap{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:8px 6px 4px;margin-bottom:14px}
+  .mapwrap svg{width:100%;height:auto;display:block}
+  .map-cap{display:flex;justify-content:space-between;font-size:9.5px;color:rgba(255,255,255,.36);padding:2px 8px 6px;letter-spacing:.2px}
+
+  .advice{display:flex;gap:9px;margin-bottom:18px}
+  .advice .ic{width:22px;height:22px;flex:none;border-radius:7px;background:var(--acc-dim);display:grid;place-items:center;color:var(--acc);font-size:11px;font-weight:700}
+  .advice p{font-size:11.5px;line-height:1.65;color:rgba(255,255,255,.72)}
+  .advice p b{color:#fff;font-weight:600}
+
+  .btn-row{display:flex;gap:10px}
+  .btn{flex:1;height:46px;border-radius:13px;display:grid;place-items:center;font-size:13px;font-weight:600;letter-spacing:.2px}
+  .btn.pri{background:var(--acc);color:#04241E;box-shadow:0 8px 22px -8px rgba(79,227,193,.7)}
+  .btn.ghost{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.9);flex:none;width:52px}
+
+  /* ---------- screen 3 : params ---------- */
+  .s3{position:absolute;top:52px;left:0;right:0;bottom:0;z-index:10;display:flex;flex-direction:column;padding:8px 22px 26px}
+  .s3-head{padding:0}
+  .s3-head h2{font-size:19px;font-weight:650;letter-spacing:-.3px}
+  .s3-head p{font-size:11.5px;color:rgba(255,255,255,.45);margin-top:6px;line-height:1.6}
+  .master{
+    margin:18px 0 0;padding:13px 14px;border-radius:14px;
+    background:linear-gradient(120deg,rgba(79,227,193,.16),rgba(79,227,193,.05));
+    border:1px solid rgba(79,227,193,.32);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .master .l{display:flex;align-items:center;gap:9px}
+  .master .l b{font-size:12.5px;font-weight:600}
+  .master .l span{font-size:10px;color:rgba(255,255,255,.5);display:block;margin-top:2px}
+  .master .l .badge{width:24px;height:24px;border-radius:8px;background:rgba(79,227,193,.2);display:grid;place-items:center;font-size:11px;color:var(--acc);font-weight:700}
+  .switch{width:42px;height:25px;border-radius:99px;background:var(--acc);position:relative;flex:none}
+  .switch::after{content:"";position:absolute;top:3px;right:3px;width:19px;height:19px;border-radius:50%;background:#04241E}
+
+  .params{padding:4px 0 0;margin-top:4px}
+  .prow{padding:17px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+  .prow:last-child{border-bottom:0}
+  .prow-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+  .prow-top .name{font-size:12px;color:rgba(255,255,255,.62);letter-spacing:.2px;display:flex;align-items:center;gap:7px}
+  .prow-top .name i{font-style:normal;font-size:8.5px;color:var(--acc);background:var(--acc-dim);padding:1.5px 5px;border-radius:4px;letter-spacing:.3px}
+  .prow-top .val{font-size:14px;font-weight:640;letter-spacing:-.2px;font-variant-numeric:tabular-nums}
+  .prow-top .val small{font-size:10px;color:rgba(255,255,255,.4);font-weight:500;margin-left:2px}
+  .track{height:4px;border-radius:99px;background:rgba(255,255,255,.11);position:relative}
+  .track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,rgba(79,227,193,.5),var(--acc))}
+  .track .knob{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);box-shadow:0 1px 5px rgba(0,0,0,.5)}
+  .track .auto{position:absolute;top:-1px;width:2px;height:6px;background:rgba(255,255,255,.28);border-radius:2px}
+  .scale{display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.26);margin-top:7px;letter-spacing:.2px}
+
+  .delta{
+    margin:12px 0 0;padding:10px 12px;border-radius:10px;
+    background:rgba(255,196,107,.09);border:1px solid rgba(255,196,107,.2);
+    font-size:10.5px;color:rgba(255,255,255,.7);line-height:1.6;
+  }
+  .delta b{color:var(--warn);font-weight:600}
+  .s3-foot{margin-top:auto;padding-top:16px;display:flex;gap:10px}
+  .s3-foot .btn{height:48px}
+
+  /* ---------- screen 4 : composition ---------- */
+  .thirds{position:absolute;inset:0;z-index:12;pointer-events:none}
+  .thirds .v,.thirds .h{position:absolute;background:rgba(255,255,255,.15)}
+  .thirds .v{top:0;bottom:0;width:1px}
+  .thirds .h{left:0;right:0;height:1px}
+  .thirds .v1{left:33.33%}.thirds .v2{left:66.66%}
+  .thirds .h1{top:33.33%}.thirds .h2{top:66.66%}
+  .thirds .center{position:absolute;left:33.33%;top:33.33%;width:8px;height:8px;border:1px solid rgba(79,227,193,.85);border-radius:50%;transform:translate(-50%,-50%)}
+
+  .vline{position:absolute;width:0;border-left:1px solid rgba(79,227,193,.6);z-index:26}
+  .vline::before,.vline::after{content:"";position:absolute;left:-3.5px;width:7px;height:1px;background:rgba(79,227,193,.6)}
+  .vline::before{top:0}.vline::after{bottom:0}
+  .vline span{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:9.5px;color:var(--acc);letter-spacing:1.2px;white-space:nowrap;writing-mode:vertical-rl}
+  .hline{position:absolute;left:18px;right:18px;height:0;border-top:1px dashed rgba(79,227,193,.5);z-index:26}
+  .hline span{position:absolute;right:0;top:-19px;font-size:9.5px;color:var(--acc);letter-spacing:.3px;background:rgba(10,12,18,.55);padding:2px 6px;border-radius:4px;backdrop-filter:blur(8px);white-space:nowrap}
+
+  .s4-subject{
+    position:absolute;left:33.33%;top:47%;transform:translate(-50%,-50%);z-index:22;
+    width:86px;height:200px;
+  }
+  .s4-subject svg{width:100%;height:100%;fill:rgba(255,255,255,.1);stroke:rgba(255,255,255,.55);stroke-width:1.3;stroke-dasharray:5 4}
+  .s4-subject .ring{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);width:64px;height:14px;border-radius:50%;border:1.4px dashed rgba(79,227,193,.8)}
+
+  .tips{position:absolute;left:18px;right:18px;bottom:150px;z-index:30;display:flex;flex-direction:column;gap:8px}
+  .tip{
+    display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:11px;
+    background:rgba(10,12,18,.5);border:1px solid rgba(255,255,255,.13);
+    backdrop-filter:blur(16px);font-size:11px;color:rgba(255,255,255,.82);letter-spacing:.1px;
+  }
+  .tip .k{font-size:9px;color:var(--acc);border:1px solid rgba(79,227,193,.4);border-radius:4px;padding:1px 5px;flex:none;letter-spacing:.3px}
+  .tip b{color:#fff;font-weight:600}
+
+  .pose-row{position:absolute;left:18px;right:18px;bottom:96px;z-index:30;display:flex;gap:8px}
+  .pose{
+    flex:1;padding:10px 8px;border-radius:11px;text-align:center;
+    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+    font-size:10.5px;color:rgba(255,255,255,.78);letter-spacing:.1px;
+  }
+  .pose.on{background:rgba(79,227,193,.15);border-color:rgba(79,227,193,.42);color:var(--acc);font-weight:600}
+  .pose em{display:block;font-style:normal;font-size:8.5px;color:rgba(255,255,255,.34);margin-top:3px;letter-spacing:.2px}
+  .pose.on em{color:rgba(79,227,193,.6)}
+
+  /* ---------- screen 5 : gallery ---------- */
+  .s5{background:#08090D}
+  .s5-top{position:absolute;top:56px;left:0;right:0;padding:0 20px;z-index:20;display:flex;align-items:center;justify-content:space-between}
+  .s5-top h2{font-size:16px;font-weight:640;letter-spacing:-.2px}
+  .s5-top .r{font-size:11px;color:rgba(255,255,255,.45)}
+  .s5-hero{position:absolute;top:104px;left:20px;right:20px;height:238px;border-radius:18px;overflow:hidden;
+    background:linear-gradient(165deg,#1a2340,#5c3e63 32%,#c46e56 55%,#f0a46b 62%,#2a2233 100%);
+    box-shadow:0 18px 40px -18px rgba(0,0,0,.8)}
+  .s5-hero .hero-fig{position:absolute;left:46%;bottom:7%;transform:translateX(-50%);width:54px;height:126px;fill:rgba(22,12,10,.62);filter:blur(2px)}
+  .s5-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.62))}
+  .score{
+    position:absolute;top:12px;right:12px;z-index:3;
+    background:rgba(8,10,14,.6);border:1px solid rgba(79,227,193,.5);color:var(--acc);
+    font-size:10px;font-weight:700;padding:4px 8px;border-radius:7px;backdrop-filter:blur(10px);letter-spacing:.3px;
+  }
+  .hero-meta{position:absolute;left:12px;bottom:12px;z-index:3;display:flex;gap:6px;flex-wrap:wrap}
+  .hero-meta span{font-size:9px;color:rgba(255,255,255,.82);background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.14);padding:3px 7px;border-radius:5px;letter-spacing:.2px;backdrop-filter:blur(8px)}
+  .s5-grid{position:absolute;top:362px;left:20px;right:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .cell{aspect-ratio:1/1.16;border-radius:10px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.07)}
+  .cell::after{content:attr(data-s);position:absolute;right:4px;bottom:4px;font-size:8px;color:rgba(255,255,255,.9);background:rgba(0,0,0,.45);padding:1px 4px;border-radius:3px;letter-spacing:.2px}
+  .c1{background:linear-gradient(160deg,#1a2340,#8a5a7a 45%,#f0b47a 70%,#2a2233)}
+  .c2{background:linear-gradient(160deg,#0d1428,#2c2c58 40%,#94566a 72%,#101018)}
+  .c3{background:linear-gradient(200deg,#20304a,#4a6b8a 55%,#c9d8e4 80%)}
+  .c4{background:linear-gradient(160deg,#2a1f2e,#6b3f4a 55%,#e0a07a 85%)}
+  .c5{background:linear-gradient(160deg,#101828,#20304a 50%,#4a5a72 85%)}
+  .c6{background:linear-gradient(160deg,#241a2c,#5c3e63 50%,#c46e56 88%)}
+  .s5-tip{
+    position:absolute;left:20px;right:20px;bottom:88px;
+    display:flex;align-items:center;gap:9px;padding:11px 13px;border-radius:12px;
+    background:rgba(79,227,193,.09);border:1px solid rgba(79,227,193,.26);
+    font-size:10.5px;color:rgba(255,255,255,.72);line-height:1.5;
+  }
+  .s5-tip b{color:var(--acc);font-weight:600}
+  .s5-nav{position:absolute;left:0;right:0;bottom:22px;height:52px;display:flex;align-items:center;justify-content:space-around;border-top:1px solid rgba(255,255,255,.08);padding:0 30px}
+  .s5-nav span{font-size:9.5px;color:rgba(255,255,255,.3);display:flex;flex-direction:column;align-items:center;gap:5px;letter-spacing:.3px}
+  .s5-nav span.on{color:var(--acc)}
+  .s5-nav span svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.95}
+
+  /* ---------- spec ---------- */
+  .spec{max-width:1560px;margin:96px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:26px;
+    border-top:1px solid rgba(20,24,32,.09);padding-top:40px}
+  .spec-col h4{font-size:11px;letter-spacing:1.2px;color:#98A0AD;font-weight:600;text-transform:uppercase;margin-bottom:16px}
+  .swatches{display:flex;gap:10px;flex-wrap:wrap}
+  .sw{width:64px}
+  .sw i{display:block;height:44px;border-radius:9px;border:1px solid rgba(20,24,32,.08);margin-bottom:7px}
+  .sw b{display:block;font-size:10.5px;color:#3D4350;font-weight:600}
+  .sw span{display:block;font-size:9.5px;color:#98A0AD;font-family:ui-monospace,monospace;margin-top:1px}
+  .spec-list{display:flex;flex-direction:column;gap:11px}
+  .spec-list li{list-style:none;font-size:11.5px;line-height:1.6;color:#5B6373;display:flex;gap:9px}
+  .spec-list li::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--acc);flex:none;margin-top:7px}
+  .spec-list li b{color:#15171C;font-weight:600}
+  .type-row{display:flex;align-items:baseline;gap:12px;font-size:11.5px;color:#98A0AD;margin-bottom:10px}
+  .type-row em{font-style:normal;color:#15171C}
+  .type-row .t1{font-size:19px;font-weight:650;letter-spacing:-.3px}
+  .type-row .t2{font-size:14px;font-weight:600}
+  .type-row .t3{font-size:12px}
+  .type-row .t4{font-size:10.5px;letter-spacing:.2px}
+
+  @media (max-width:900px){
+    body{padding:32px 18px 60px}
+    .stage{gap:40px}
+    .head{margin-bottom:36px}
+  }
+</style>
+</head>
+<body>
+
+<header class="head">
+  <div class="brand">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="#4FE3C1" stroke-width="1.4" opacity=".55"/>
+        <path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" stroke="#4FE3C1" stroke-width="1" opacity=".35"/>
+        <circle cx="12" cy="12" r="3.6" fill="#4FE3C1"/>
+      </svg>
+    </div>
+    <div>
+      <h1>SceneMate · 取景助手</h1>
+      <div class="sub">AI 站位引导 · 相机参数自动调节　—　UI 概念稿 v0.1</div>
+    </div>
+  </div>
+  <div class="head-tags">
+    <span class="tag on"><i></i>Dark Camera UI</span>
+    <span class="tag">iPhone 15 Pro · 393×852</span>
+    <span class="tag">5 Screens</span>
+    <span class="tag">拍摄 / 取景场景</span>
+  </div>
+</header>
+
+<main class="stage">
+
+  <!-- ============ 01 实时取景 ============ -->
+  <figure class="device">
+    <div class="frame">
+      <div class="screen">
+        <div class="scene scene-sunset"></div>
+        <div class="vignette"></div>
+        <div class="scan"></div>
+        <div class="notch"></div>
+
+        <div class="statusbar">
+          <span>14:32</span>
+          <span class="sb-right">
+            <span class="bars"><i></i><i></i><i></i><i></i></span>
+            <svg width="15" height="11" viewBox="0 0 16 12" fill="none" style="stroke:currentColor;stroke-width:1.6;stroke-linecap:round"><path d="M1 4.2A10 10 0 0 1 15 4.2"/><path d="M3.6 6.8a6.4 6.4 0 0 1 8.8 0"/><circle cx="8" cy="9.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+            <span class="batt"></span>
+          </span>
+        </div>
+
+        <div class="ai-pill">
+          <i class="dot"></i>
+          <span>AI 识别</span>
+          <b>海边日落</b>
+          <em>96%</em>
+        </div>
+
+        <div class="toolbar">
+          <div class="tbtn act"><svg viewBox="0 0 24 24"><path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z"/></svg></div>
+          <div class="tbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg></div>
+          <div class="tbtn"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M9 5v14M15 5v14M3 12h18"/></svg></div>
+          <div class="tbtn"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M8 4v16M16 4v16"/></svg></div>
+        </div>
+
+        <div class="guide">
+          <div class="guide-bg"></div>
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+          <div class="guide-tag">站 这 里</div>
+          <svg class="figure-ghost" viewBox="0 0 60 140">
+            <circle cx="30" cy="15" r="12"/>
+            <path d="M30 31c-8.6 0-14.4 5.8-15.4 14.4l-2.6 21c-.4 3.2 3.8 4.2 4.8 1l3.2-12.6 1 24.4-2.8 43.4c-.2 3.4 4.6 4.2 5.6 1l6.4-31.2h1.6l6.4 31.2c1 3.2 5.8 2.4 5.6-1l-2.8-43.4 1-24.4 3.2 12.6c1 3.2 5.2 2.2 4.8-1l-2.6-21C44.4 36.8 38.6 31 30 31Z"/>
+          </svg>
+          <div class="feet"><i></i><i></i></div>
+          <div class="dist">距镜头 2.4 m · 后退半步</div>
+        </div>
+
+        <div class="hint-chip">建议 <b>侧身 30°</b>，让轮廓避开地平线</div>
+
+        <div class="exif">
+          <b>AI 自动</b><span class="sep"></span>ISO 100<span class="sep"></span>1/125s<span class="sep"></span>EV −0.3
+        </div>
+
+        <div class="modes">
+          <span>夜景</span><span class="on">人像</span><span>视频</span><span>专业</span>
+        </div>
+
+        <div class="controls">
+          <div class="thumb"></div>
+          <div class="shutter"><i></i></div>
+          <div class="flip"><svg viewBox="0 0 24 24"><path d="M3 8h13a4 4 0 0 1 4 4M21 16H8a4 4 0 0 1-4-4"/><path d="M6 5 3 8l3 3M18 13l3 3-3 3"/></svg></div>
+        </div>
+
+        <div class="home-bar"></div>
+      </div>
+    </div>
+    <figcaption>
+      <div class="cap-top"><span class="cap-num">01</span><span class="cap-title">实时取景 · AI 站位引导</span></div>
+      <div class="cap-desc">打开即相机。AI 在取景框内直接框出「人物该站的位置」，底部同步显示已自动接管的曝光参数。</div>
+    </figcaption>
+  </figure>
+
+  <!-- ============ 02 场景分析 ============ -->
+  <figure class="device">
+    <div class="frame">
+      <div class="screen">
+        <div class="scene scene-sunset s2-scene"></div>
+        <div class="vignette"></div>
+        <div class="notch"></div>
+
+        <div class="statusbar">
+          <span>14:32</span>
+          <span class="sb-right"><span class="bars"><i></i><i></i><i></i><i></i></span><span class="batt"></span></span>
+        </div>
+
+        <div class="s2-top">
+          <div class="s2-back"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+          <div class="s2-frames">已分析 128 帧 · 20fps</div>
+        </div>
+
+        <div class="sheet">
+          <div class="handle"></div>
+          <div class="sheet-head">
+            <h3>AI 场景分析</h3>
+            <div class="live"><i></i>实时更新</div>
+          </div>
+
+          <div class="kv">
+            <div class="kv-item"><span>场景 <em>96%</em></span><b>海边日落</b></div>
+            <div class="kv-item"><span>光线</span><b>逆光 强反差</b></div>
+            <div class="kv-item"><span>主体</span><b>单人 全身</b></div>
+          </div>
+
+          <div class="mapwrap">
+            <svg viewBox="0 0 300 152">
+              <defs>
+                <linearGradient id="cone" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#4FE3C1" stop-opacity=".18"/>
+                  <stop offset="1" stop-color="#4FE3C1" stop-opacity=".02"/>
+                </linearGradient>
+              </defs>
+              <!-- 视野锥 -->
+              <path d="M136 126 L96 34 L204 34 L164 126 Z" fill="url(#cone)" stroke="#4FE3C1" stroke-opacity=".45" stroke-width="1" stroke-dasharray="4 5"/>
+              <!-- 太阳方向 -->
+              <circle cx="246" cy="34" r="9" fill="#FFC46B" opacity=".92"/>
+              <path d="M246 34 L172 74" stroke="#FFC46B" stroke-opacity=".5" stroke-width="1.2" stroke-dasharray="3 4"/>
+              <text x="238" y="60" fill="#FFC46B" font-size="8" opacity=".8" font-family="sans-serif">逆光</text>
+              <!-- 主体 -->
+              <circle cx="150" cy="62" r="9.5" fill="none" stroke="#4FE3C1" stroke-width="2"/>
+              <path d="M150 72 v20 M150 78 l-8 6 M150 78 l8 6 M150 92 l-7 16 M150 92 l7 16" stroke="#4FE3C1" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="150" cy="118" r="16" fill="none" stroke="#4FE3C1" stroke-opacity=".3" stroke-width="1" stroke-dasharray="3 4"/>
+              <!-- 相机 -->
+              <rect x="138" y="120" width="24" height="16" rx="4" fill="#0A0B0F" stroke="#4FE3C1" stroke-width="1.6"/>
+              <circle cx="150" cy="128" r="4" fill="none" stroke="#4FE3C1" stroke-width="1.4"/>
+              <!-- 距离标注 -->
+              <path d="M196 96 L196 122" stroke="rgba(255,255,255,.28)" stroke-width="1" stroke-dasharray="2 3"/>
+              <text x="201" y="112" fill="rgba(255,255,255,.62)" font-size="9" font-family="sans-serif">2.4 m</text>
+              <!-- 角度 -->
+              <path d="M136 126 A 34 34 0 0 0 122 100" fill="none" stroke="#4FE3C1" stroke-opacity=".55" stroke-width="1"/>
+              <text x="96" y="120" fill="#4FE3C1" font-size="8.5" font-family="sans-serif" opacity=".85">45°</text>
+            </svg>
+            <div class="map-cap"><span>俯视站位示意</span><span>已避开直射逆光</span></div>
+          </div>
+
+          <div class="advice">
+            <div class="ic">!</div>
+            <p>人物站位偏右 <b>0.6 m</b> 可让海平面落在肩线下方；当前逆光强度较高，已<b>锁定人脸曝光</b>并压暗背景 0.3EV。</p>
+          </div>
+
+          <div class="btn-row">
+            <div class="btn ghost">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6 3v18M18 3v18"/></svg>
+            </div>
+            <div class="btn pri">应用建议构图</div>
+          </div>
+        </div>
+
+        <div class="home-bar"></div>
+      </div>
+    </div>
+    <figcaption>
+      <div class="cap-top"><span class="cap-num">02</span><span class="cap-title">场景分析 · 站位俯视图</span></div>
+      <div class="cap-desc">把「AI 到底看到了什么」说清楚：场景、光线、主体，加一张俯视站位图，给出可执行的移动建议。</div>
+    </figcaption>
+  </figure>
+
+  <!-- ============ 03 参数面板 ============ -->
+  <figure class="device">
+    <div class="frame">
+      <div class="screen">
+        <div class="scene scene-dusk" style="opacity:.5"></div>
+        <div class="notch"></div>
+        <div class="statusbar">
+          <span>14:32</span>
+          <span class="sb-right"><span class="bars"><i></i><i></i><i></i><i></i></span><span class="batt"></span></span>
+        </div>
+
+        <div class="s3">
+        <div class="s3-head">
+          <h2>拍摄参数</h2>
+          <p>AI 根据当前场景实时接管曝光，你随时可以手动覆盖任意一项。</p>
+        </div>
+
+        <div class="master">
+          <div class="l">
+            <div class="badge">AI</div>
+            <div>
+              <b>智能曝光已开启</b>
+              <span>4 项参数 · 每 200ms 重新计算</span>
+            </div>
+          </div>
+          <div class="switch"></div>
+        </div>
+
+        <div class="params">
+          <div class="prow">
+            <div class="prow-top">
+              <div class="name">ISO 感光度 <i>自动</i></div>
+              <div class="val">100<small>→ 800</small></div>
+            </div>
+            <div class="track">
+              <div class="fill" style="width:18%"></div>
+              <div class="auto" style="left:18%"></div>
+              <div class="knob" style="left:18%"></div>
+            </div>
+            <div class="scale"><span>50</span><span>400</span><span>3200</span><span>12800</span></div>
+          </div>
+
+          <div class="prow">
+            <div class="prow-top">
+              <div class="name">快门速度 <i>自动</i></div>
+              <div class="val">1/125<small>s</small></div>
+            </div>
+            <div class="track">
+              <div class="fill" style="width:46%"></div>
+              <div class="auto" style="left:46%"></div>
+              <div class="knob" style="left:46%"></div>
+            </div>
+            <div class="scale"><span>1/1000</span><span>1/250</span><span>1/60</span><span>1/8</span></div>
+          </div>
+
+          <div class="prow">
+            <div class="prow-top">
+              <div class="name">曝光补偿 <i>自动</i></div>
+              <div class="val">−0.3<small>EV</small></div>
+            </div>
+            <div class="track">
+              <div class="fill" style="width:44%"></div>
+              <div class="auto" style="left:50%"></div>
+              <div class="knob" style="left:44%"></div>
+            </div>
+            <div class="scale"><span>−2</span><span>−1</span><span>0</span><span>+1</span><span>+2</span></div>
+          </div>
+
+          <div class="prow">
+            <div class="prow-top">
+              <div class="name">白平衡 <i>自动</i></div>
+              <div class="val">4800<small>K</small></div>
+            </div>
+            <div class="track">
+              <div class="fill" style="width:42%"></div>
+              <div class="auto" style="left:42%"></div>
+              <div class="knob" style="left:42%"></div>
+            </div>
+            <div class="scale"><span>2500K</span><span>4500K</span><span>6500K</span><span>9000K</span></div>
+          </div>
+        </div>
+
+        <div class="delta">
+          相比上一帧：<b>ISO 800 → 100</b>（噪点降低 87%），快门提升至 1/125s 以冻结发丝。日落还剩 <b>18 分钟</b>，建议尽快拍摄。
+        </div>
+
+        <div class="s3-foot">
+          <div class="btn ghost" style="flex:1;width:auto">恢复默认</div>
+          <div class="btn pri" style="flex:1.6">锁定此参数</div>
+        </div>
+        </div>
+
+        <div class="home-bar"></div>
+      </div>
+    </div>
+    <figcaption>
+      <div class="cap-top"><span class="cap-num">03</span><span class="cap-title">参数自动调节</span></div>
+      <div class="cap-desc">ISO / 快门 / EV / 白平衡四条轨道，标出 AI 当前取值与自动接管范围，并解释「为什么这么调」。</div>
+    </figcaption>
+  </figure>
+
+  <!-- ============ 04 构图引导 ============ -->
+  <figure class="device">
+    <div class="frame">
+      <div class="screen">
+        <div class="scene scene-sunset"></div>
+        <div class="vignette"></div>
+
+        <div class="thirds">
+          <div class="v v1"></div><div class="v v2"></div>
+          <div class="h h1"></div><div class="h h2"></div>
+          <div class="center"></div>
+        </div>
+
+        <div class="notch"></div>
+        <div class="statusbar">
+          <span>14:32</span>
+          <span class="sb-right"><span class="bars"><i></i><i></i><i></i><i></i></span><span class="batt"></span></span>
+        </div>
+
+        <div class="ai-pill" style="top:60px">
+          <i class="dot"></i><span>构图模式</span><b>三分法 + 留白</b>
+        </div>
+
+        <div class="s4-subject">
+          <svg viewBox="0 0 60 140">
+            <circle cx="30" cy="15" r="12"/>
+            <path d="M30 31c-8.6 0-14.4 5.8-15.4 14.4l-2.6 21c-.4 3.2 3.8 4.2 4.8 1l3.2-12.6 1 24.4-2.8 43.4c-.2 3.4 4.6 4.2 5.6 1l6.4-31.2h1.6l6.4 31.2c1 3.2 5.8 2.4 5.6-1l-2.8-43.4 1-24.4 3.2 12.6c1 3.2 5.2 2.2 4.8-1l-2.6-21C44.4 36.8 38.6 31 30 31Z"/>
+          </svg>
+          <div class="ring"></div>
+        </div>
+
+        <div class="vline" style="left:20px;top:150px;height:118px"><span>头顶留白 1/3</span></div>
+        <div class="hline" style="top:446px"><span>海平面 · 建议压在下三分线</span></div>
+
+        <div class="tips">
+          <div class="tip"><span class="k">01</span>人物落在左三分线，<b>视线方向留出空间</b></div>
+          <div class="tip"><span class="k">02</span>手机<b>略低于胸口</b>仰拍 5°，腿长 +12%</div>
+        </div>
+
+        <div class="pose-row">
+          <div class="pose on">侧身回望<em>推荐</em></div>
+          <div class="pose">手扶发梢<em>自然</em></div>
+          <div class="pose">插兜行走<em>动态</em></div>
+        </div>
+
+        <div class="home-bar"></div>
+      </div>
+    </div>
+    <figcaption>
+      <div class="cap-top"><span class="cap-num">04</span><span class="cap-title">构图与姿势引导</span></div>
+      <div class="cap-desc">三分线网格 + 留白标尺 + 地平线对齐提示，底部给出 3 个可执行的姿势选项。</div>
+    </figcaption>
+  </figure>
+
+  <!-- ============ 05 相册 ============ -->
+  <figure class="device">
+    <div class="frame">
+      <div class="screen s5">
+        <div class="notch"></div>
+        <div class="statusbar">
+          <span>14:32</span>
+          <span class="sb-right"><span class="bars"><i></i><i></i><i></i><i></i></span><span class="batt"></span></span>
+        </div>
+
+        <div class="s5-top">
+          <h2>今日拍摄</h2>
+          <div class="r">12 张 · 4 张精选</div>
+        </div>
+
+        <div class="s5-hero">
+          <svg class="hero-fig" viewBox="0 0 60 140">
+            <circle cx="30" cy="15" r="12"/>
+            <path d="M30 31c-8.6 0-14.4 5.8-15.4 14.4l-2.6 21c-.4 3.2 3.8 4.2 4.8 1l3.2-12.6 1 24.4-2.8 43.4c-.2 3.4 4.6 4.2 5.6 1l6.4-31.2h1.6l6.4 31.2c1 3.2 5.8 2.4 5.6-1l-2.8-43.4 1-24.4 3.2 12.6c1 3.2 5.2 2.2 4.8-1l-2.6-21C44.4 36.8 38.6 31 30 31Z"/>
+          </svg>
+          <div class="score">AI 评分 92</div>
+          <div class="hero-meta">
+            <span>ISO 100</span><span>1/125s</span><span>f/1.8</span><span>4800K</span>
+          </div>
+        </div>
+
+        <div class="s5-grid">
+          <div class="cell c1" data-s="88"></div>
+          <div class="cell c2" data-s="84"></div>
+          <div class="cell c3" data-s="79"></div>
+          <div class="cell c4" data-s="91"></div>
+          <div class="cell c5" data-s="72"></div>
+          <div class="cell c6" data-s="86"></div>
+        </div>
+
+        <div class="s5-tip">
+          <div class="ic" style="width:22px;height:22px;flex:none;border-radius:7px;background:rgba(79,227,193,.16);display:grid;place-items:center;color:var(--acc);font-size:11px;font-weight:700">✓</div>
+          <div>本组最佳：<b>左三分线 + 逆光轮廓</b>。AI 已按站位建议自动裁剪 4:5。</div>
+        </div>
+
+        <div class="s5-nav">
+          <span class="on"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M3.5 17.5 9 12l3.5 3.5L15 13l5.5 5.5"/></svg>相册</span>
+          <span><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="13" rx="3"/><circle cx="12" cy="12.5" r="3.6"/><path d="M8.5 6l1.4-2.2h4.2L15.5 6"/></svg>拍摄</span>
+          <span><svg viewBox="0 0 24 24"><path d="M12 3.5l1.9 4.9 4.9 1.9-4.9 1.9L12 17.1l-1.9-4.9L5.2 10.3l4.9-1.9z"/><path d="M18.5 16.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>灵感</span>
+          <span><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 20c.6-3.7 3.6-5.6 7.2-5.6s6.6 1.9 7.2 5.6"/></svg>我的</span>
+        </div>
+
+        <div class="home-bar"></div>
+      </div>
+    </div>
+    <figcaption>
+      <div class="cap-top"><span class="cap-num">05</span><span class="cap-title">成片与相册</span></div>
+      <div class="cap-desc">拍完给反馈闭环：AI 评分、实际拍摄参数、本组最佳理由，让用户知道下次怎么拍更好。</div>
+    </figcaption>
+  </figure>
+
+</main>
+
+<!-- ============ 设计说明 ============ -->
+<section class="spec">
+  <div class="spec-col">
+    <h4>Color</h4>
+    <div class="swatches">
+      <div class="sw"><i style="background:#4FE3C1"></i><b>Accent</b><span>#4FE3C1</span></div>
+      <div class="sw"><i style="background:#0A0B0F"></i><b>Base</b><span>#0A0B0F</span></div>
+      <div class="sw"><i style="background:#FFC46B"></i><b>Warn</b><span>#FFC46B</span></div>
+      <div class="sw"><i style="background:rgba(255,255,255,.075)"></i><b>Glass</b><span>W 7.5%</span></div>
+    </div>
+  </div>
+
+  <div class="spec-col">
+    <h4>Type Scale</h4>
+    <div class="type-row"><em class="t1">19 / 650</em><span>页面标题</span></div>
+    <div class="type-row"><em class="t2">14.5 / 640</em><span>卡片标题</span></div>
+    <div class="type-row"><em class="t3">12 / 400</em><span>正文</span></div>
+    <div class="type-row"><em class="t4">10.5 / 500 · 0.2px</em><span>参数 / 标签</span></div>
+  </div>
+
+  <div class="spec-col">
+    <h4>关键设计决策</h4>
+    <ul class="spec-list">
+      <li><b>全屏取景，信息浮层</b>：AI 结果不跳页，用胶囊 + 叠加层呈现，不打断构图。</li>
+      <li><b>青色只给「AI 说的」</b>：站位框、建议、自动值统一用 Accent，用户手动项一律中性白，一眼分清谁在控制。</li>
+      <li><b>站位用脚印 + 距离</b>：虚线框只解决「站哪」，脚印和 2.4m 解决「站多远」，可执行性更强。</li>
+      <li><b>参数要解释</b>：每个自动值都带「为什么」，避免用户不敢信任自动曝光。</li>
+    </ul>
+  </div>
+
+  <div class="spec-col">
+    <h4>下一步</h4>
+    <ul class="spec-list">
+      <li>拍摄中「多人场景」：站位框自动分裂为 2–3 个，标注主次关系。</li>
+      <li>低光场景：ISO 上限提示 + 手持稳定度指示环。</li>
+      <li>AR 引导：脚印改为地面投影贴图，实时跟随手机姿态。</li>
+      <li>空状态 / 权限拒绝 / 网络弱（AI 降级为端侧模型）三种兜底页。</li>
+    </ul>
+  </div>
+</section>
+
+</body>
+</html>
